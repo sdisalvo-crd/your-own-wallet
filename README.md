@@ -1,3 +1,5 @@
+### Instructions
+
 1. Start from a basic React app + Webpack 5 boilerplate (example: https://github.com/sdisalvo-crd/react-template.git).
 
 2. Add the following dependencies to the `package.json` file and run `npm install` to install them (remove the comments):
