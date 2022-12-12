@@ -1,10 +1,26 @@
 const path = require('path');
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   entry: path.resolve(__dirname, '..', './src/index.tsx'),
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
+    fallback: {
+      crypto: require.resolve('crypto-browserify'),
+      stream: require.resolve('stream-browserify'),
+      buffer: require.resolve('buffer/'),
+    },
+  },
+  experiments: {
+    asyncWebAssembly: true,
+    syncWebAssembly: true,
+  },
+  devServer: {
+    historyApiFallback: true,
+    client: {
+      overlay: false,
+    },
   },
   module: {
     rules: [
@@ -39,6 +55,9 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, '..', './src/index.html'),
+    }),
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
     }),
   ],
 };
