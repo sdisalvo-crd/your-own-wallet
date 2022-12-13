@@ -160,7 +160,7 @@ export const generatePrivateKey = async (seedPhrase: string) => {
 }
 ```
 
-12. As we mentioned earlier, other keys can be derived rom our wallet key. With the following code we will return our private key:
+12. As we mentioned earlier, other keys can be derived rom our wallet key. With the following code we will generate our private key:
 
 ```
 export const derivePrivateKey = (privateKey: Bip32PrivateKey, index = 0) => {
@@ -172,7 +172,7 @@ export const derivePrivateKey = (privateKey: Bip32PrivateKey, index = 0) => {
 }
 ```
 
-And the following code will return our stake address:
+And the following code will help generate our stake address:
 
 ```
 export const harden = (num: number) => {
@@ -254,3 +254,5 @@ export const App = () => {
 ```
 
 If you now run `npm start` and take a look at your browser you should see the seed phrase (with validation info) and the stake address as follows:
+
+![13122022151446](https://user-images.githubusercontent.com/119612231/207372478-29a31a6b-0515-4a7d-8aa3-51fb9d441ec9.jpg)
