@@ -120,3 +120,6 @@ EmurgoModule.CardanoWasm().then((cardano) => {
 ```
 
 9. Run `npm start` and check your console logs in the browser. You should now see the seedphrase and a line indicating the validity.
+
+![13122022120208](https://user-images.githubusercontent.com/119612231/207313203-9745fdca-ad9f-4c50-a59d-8cd99c39c4d4.jpg)
+
