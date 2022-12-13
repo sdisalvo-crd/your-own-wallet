@@ -1,19 +1,49 @@
 import './styles.css';
+import { useState, useEffect } from 'react';
 import { EmurgoModule } from './lib/emurgo/loader';
-import { generateMnemonicSeed, validateSeedPhrase } from './lib/account';
+import {
+  generateMnemonicSeed,
+  validateSeedPhrase,
+  generatePrivateKey,
+  derivePrivateKey,
+  generateStakeAddress,
+} from './lib/account';
 
 export const App = () => {
-  EmurgoModule.CardanoWasm().then((cardano) => {
-    // This will return the whole object
-    console.log(cardano);
-    // This will generate a seedphrase
-    const testSeedPhrase = generateMnemonicSeed(160);
-    console.log('Seedphrase: ', testSeedPhrase);
-    // This will verify if the seedphrase is valid
-    console.log(
-      'Is the seedphrase valid? ',
-      validateSeedPhrase(testSeedPhrase)
-    );
-  });
-  return <h1>Your own wallet</h1>;
+  const [seedPhrase, setSeedPhrase] = useState('');
+  const [isValid, setIsValid] = useState(false);
+  const [privateKey, setPrivateKey] = useState<any>(undefined);
+  const [stakeAddress, setStakeAddress] = useState<any>(undefined);
+
+  useEffect(() => {
+    EmurgoModule.CardanoWasm().then((cardano) => {
+      // This will generate a seedphrase
+      const getSeedPhrase = generateMnemonicSeed(160);
+      setSeedPhrase(getSeedPhrase);
+      // This will verify that the seedphrase is valid
+      setIsValid(validateSeedPhrase(getSeedPhrase));
+      // This will generate a private key and a stake address
+      const getPrivateKey = generatePrivateKey(getSeedPhrase).then((pkey) => {
+        setPrivateKey(pkey);
+        const getStakeAddress = generateStakeAddress(
+          derivePrivateKey(pkey)
+        ).then((sAddr) => {
+          setStakeAddress(sAddr);
+        });
+      });
+    });
+  }, []);
+
+  return (
+    <>
+      <h1>Your own wallet</h1>
+      <p>
+        <strong>Seed phrase:</strong> {seedPhrase}
+        {isValid ? ' (valid)' : ' (invalid)'}
+      </p>
+      <p>
+        <strong>Stake address:</strong> {stakeAddress}
+      </p>
+    </>
+  );
 };
