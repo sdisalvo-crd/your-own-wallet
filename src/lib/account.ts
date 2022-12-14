@@ -37,12 +37,26 @@ export const harden = (num: number) => {
   return 0x80000000 + num;
 };
 
-export const generateStakeAddress = async (derivePkey: Bip32PrivateKey) => {
+export const generateStakeObject = async (derivePkey: Bip32PrivateKey) => {
   const CHIMERIC_ACCOUNT = 2;
   const STAKING_INDEX = 0;
   const stakeKey = derivePkey.derive(CHIMERIC_ACCOUNT).derive(STAKING_INDEX);
   const publicStakeKey = stakeKey.to_raw_key().to_public();
   const Cardano = await EmurgoModule.CardanoWasm();
   const stakeAddressTestnet = Cardano.RewardAddress.new(0, Cardano.StakeCredential.from_keyhash(publicStakeKey.hash()));
-  return stakeAddressTestnet.to_address().to_bech32();
+  const stakeAddress = stakeAddressTestnet.to_address().to_bech32();
+  return {
+    publicStakeKey,
+    stakeAddress,
+  };
+}
+
+export const generatePaymentAddress = async (derivePkey: Bip32PrivateKey, network: number, chain: number, index: number) => {
+  const Cardano = await EmurgoModule.CardanoWasm();
+  const stakeObject = await generateStakeObject(derivePkey);
+  const paymentKey = derivePkey.derive(chain).derive(index);
+  const paymentAddress = Cardano.BaseAddress.new(network, 
+    Cardano.StakeCredential.from_keyhash(paymentKey.to_raw_key().to_public().hash()), 
+    Cardano.StakeCredential.from_keyhash(stakeObject.publicStakeKey.hash()));
+  return paymentAddress.to_address().to_bech32();
 }
