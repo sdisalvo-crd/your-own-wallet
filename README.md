@@ -6,7 +6,7 @@ In order to better understand, we recommend that the user has at least some know
 
 ## Instructions
 
-1. For this tutorial, we recommend to start with a basic React app + Webpack 5. Feel free to create your own app from scratch or make use of a pre-made boilerplate that you can find on [this page](https://github.com/sdisalvo-crd/react-template-0.1.0).
+1. For this tutorial, we recommend to start with a basic React app + Webpack 5. Feel free to create your own app from scratch or make use of a pre-made boilerplate that you can find on [this page](https://github.com/sdisalvo-crd/react-template-1.0.0).
 
 2. We will start adding the following dependencies to the `package.json` file and run `npm install` to install them:
 
