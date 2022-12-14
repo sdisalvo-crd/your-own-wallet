@@ -6,7 +6,7 @@ In order to better understand, we recommend that the user has at least some know
 
 ## Instructions
 
-1. For this tutorial, we recommend to start from a basic React app + Webpack 5. Feel free to create your own app or use a pre-made boilerplate that you can find on [this page](https://github.com/sdisalvo-crd/react-template.git).
+1. For this tutorial, we recommend to start with a basic React app + Webpack 5. Feel free to create your own app from scratch or make use of a pre-made boilerplate that you can find on [this page](https://github.com/sdisalvo-crd/react-template-0.1.0).
 
 2. We will start adding the following dependencies to the `package.json` file and run `npm install` to install them:
 
@@ -307,3 +307,7 @@ Then we will display our address in the browser adding the following code in a n
   <strong>Payment address:</strong> {paymentAddresses[0]}
 </p>
 ```
+
+The final result should look like this:
+
+![14122022135839](https://user-images.githubusercontent.com/119612231/207621244-b1af9eb9-07bc-45cf-8b45-902165ca0428.jpg)
