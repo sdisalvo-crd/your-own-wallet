@@ -268,7 +268,7 @@ If you now run `npm start` and take a look at your browser you should see the se
 
 ![13122022151446](https://user-images.githubusercontent.com/119612231/207372478-29a31a6b-0515-4a7d-8aa3-51fb9d441ec9.jpg)
 
-14. We will now generate some payment addresses in a similar way as we did for the stake address adding the following new methods to the `account.ts` file:
+14. We will now generate multiple external and internal payment addresses in a similar way as we did earlier for the stake address, adding the following new methods to the `account.ts` file:
 
 ```
 export const generatePaymentAddress = async (derivePkey: Bip32PrivateKey, network: number, chain: number, index: number) => {
@@ -345,3 +345,5 @@ Since we will now have a lot more info to display in the browser, we will reform
 ```
 
 The final result should look like this:
+
+![15122022141627](https://user-images.githubusercontent.com/119612231/207883967-f8fd1170-7b8d-4208-ba27-fad50a023786.jpg)
