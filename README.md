@@ -366,7 +366,7 @@ useEffect(() => {
     setIsValid(validateSeedPhrase(getSeedPhrase));
   });
 }, []);
-``` 
+```
 
 Below that, we will add the second one which takes the `seedPhrase` as a dependency and therefore it will run every time a new seed phrase is introduced (eg. once when the page is loading and once every time a new seed phrase is manually added) and will update the addresses.
 
