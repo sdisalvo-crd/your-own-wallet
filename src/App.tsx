@@ -12,6 +12,7 @@ import {
 
 export const App = () => {
   const [seedPhrase, setSeedPhrase] = useState('');
+  const [updatedSeedPhrase, setUpdatedSeedPhrase] = useState('');
   const [isValid, setIsValid] = useState(false);
   const [privateKey, setPrivateKey] = useState<any>(undefined);
   const [stakeAddress, setStakeAddress] = useState<any>(undefined);
@@ -29,37 +30,55 @@ export const App = () => {
       setSeedPhrase(getSeedPhrase);
       // This will verify that the seedphrase is valid
       setIsValid(validateSeedPhrase(getSeedPhrase));
-      // This will generate a private key
-      const getPrivateKey = generatePrivateKey(getSeedPhrase).then((pkey) => {
-        setPrivateKey(pkey);
-        // This will generate a stake address based on the private key
-        const getStakeAddress = generateStakeObject(
-          derivePrivateKey(pkey)
-        ).then((sObj) => {
-          setStakeAddress(sObj.stakeAddress);
-        });
-        // This will generate a set of payment addresses based on the private key, the network ID,
-        // the chain (which can be external (0) or internal(1)) and the amount of addresses we want to generate.
-        const totalAddresses = 30;
-        // Generate external payment addresses
-        generateMultipleAddresses(pkey, 0, 0, totalAddresses).then(
-          (pAddresses) => {
-            setExternalPaymentAddresses(pAddresses);
-          }
-        );
-        // Generate internal payment addresses
-        generateMultipleAddresses(pkey, 0, 1, totalAddresses).then(
-          (pAddresses) => {
-            setInternalPaymentAddresses(pAddresses);
-          }
-        );
-      });
     });
   }, []);
+
+  useEffect(() => {
+    EmurgoModule.CardanoWasm().then((cardano) => {
+      if (seedPhrase.length) {
+        // This will generate a private key
+        const getPrivateKey = generatePrivateKey(seedPhrase).then((pkey) => {
+          setPrivateKey(pkey);
+          // This will generate a stake address based on the private key
+          const getStakeAddress = generateStakeObject(
+            derivePrivateKey(pkey)
+          ).then((sObj) => {
+            setStakeAddress(sObj.stakeAddress);
+          });
+          // This will generate a set of payment addresses based on the private key, the network ID,
+          // the chain (which can be external (0) or internal(1)) and the amount of addresses we want to generate.
+          const totalAddresses = 30;
+          // Generate external payment addresses
+          generateMultipleAddresses(pkey, 0, 0, totalAddresses).then(
+            (pAddresses) => {
+              setExternalPaymentAddresses(pAddresses);
+            }
+          );
+          // Generate internal payment addresses
+          generateMultipleAddresses(pkey, 0, 1, totalAddresses).then(
+            (pAddresses) => {
+              setInternalPaymentAddresses(pAddresses);
+            }
+          );
+        });
+      }
+    });
+  }, [seedPhrase]);
+
+  const handleClick = () => {
+    if (validateSeedPhrase(updatedSeedPhrase)) {
+      setSeedPhrase(updatedSeedPhrase);
+    } else {
+      alert('invalid seed phrase');
+    }
+  };
 
   return (
     <>
       <h1>Your own wallet</h1>
+      <h3>Use custom seed phrase:</h3>
+      <input onChange={(event) => setUpdatedSeedPhrase(event.target.value)} />
+      <button onClick={handleClick}>Update</button>
       <h3>Seed phrase:</h3>
       <p>
         {seedPhrase}

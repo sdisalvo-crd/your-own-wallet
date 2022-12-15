@@ -347,3 +347,86 @@ Since we will now have a lot more info to display in the browser, we will reform
 The final result should look like this:
 
 ![15122022141627](https://user-images.githubusercontent.com/119612231/207883967-f8fd1170-7b8d-4208-ba27-fad50a023786.jpg)
+
+15. Every time we reload the page, the system will generate a new seed phrase and then it will calculate the addresses. However, we should now introduce a way to reuse the same seed phrase multiple time. In order to do that, we need to add an input field with an update button that will discard the auto generated seed phrase and will accept our manual seed phrase. We will start by adding a new state variable to the `App.tsx` file:
+
+```
+const [updatedSeedPhrase, setUpdatedSeedPhrase] = useState('');
+```
+
+Then, we will split our useEffect() hook into two. The first one will run once, when the page is loaded, and it will generate a new seed phrase.
+
+````
+useEffect(() => {
+  EmurgoModule.CardanoWasm().then((cardano) => {
+    // This will generate a seedphrase
+    const getSeedPhrase = generateMnemonicSeed(160);
+    setSeedPhrase(getSeedPhrase);
+    // This will verify that the seedphrase is valid
+    setIsValid(validateSeedPhrase(getSeedPhrase));
+  });
+}, []);
+``` 
+
+Below that, we will add the second one which takes the `seedPhrase` as a dependency and therefore it will run every time a new seed phrase is introduced (eg. once when the page is loading and once every time a new seed phrase is manually added) and will update the addresses.
+
+````
+
+useEffect(() => {
+EmurgoModule.CardanoWasm().then((cardano) => {
+if (seedPhrase.length) {
+// This will generate a private key
+const getPrivateKey = generatePrivateKey(seedPhrase).then((pkey) => {
+setPrivateKey(pkey);
+// This will generate a stake address based on the private key
+const getStakeAddress = generateStakeObject(
+derivePrivateKey(pkey)
+).then((sObj) => {
+setStakeAddress(sObj.stakeAddress);
+});
+// This will generate a set of payment addresses based on the private key, the network ID,
+// the chain (which can be external (0) or internal(1)) and the amount of addresses we want to generate.
+const totalAddresses = 30;
+// Generate external payment addresses
+generateMultipleAddresses(pkey, 0, 0, totalAddresses).then(
+(pAddresses) => {
+setExternalPaymentAddresses(pAddresses);
+}
+);
+// Generate internal payment addresses
+generateMultipleAddresses(pkey, 0, 1, totalAddresses).then(
+(pAddresses) => {
+setInternalPaymentAddresses(pAddresses);
+}
+);
+});
+}
+});
+}, [seedPhrase]);
+
+```
+
+After that and right before the `return` we will add the following code which will take care of handling the click on our update button:
+
+```
+
+const handleClick = () => {
+if (validateSeedPhrase(updatedSeedPhrase)) {
+setSeedPhrase(updatedSeedPhrase);
+} else {
+alert('invalid seed phrase');
+}
+};
+
+```
+
+Ultimately, on a new line right after the title of our page, we will add the following code:
+
+```
+
+<h3>Use custom seed phrase:</h3>
+<input onChange={(event) => setUpdatedSeedPhrase(event.target.value)} />
+<button onClick={handleClick}>Update</button>
+```
+
+If you now look at your browser you should see what follows.
