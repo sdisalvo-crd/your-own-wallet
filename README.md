@@ -356,7 +356,7 @@ const [updatedSeedPhrase, setUpdatedSeedPhrase] = useState('');
 
 Then, we will split our useEffect() hook into two. The first one will run once, when the page is loaded, and it will generate a new seed phrase.
 
-````
+```
 useEffect(() => {
   EmurgoModule.CardanoWasm().then((cardano) => {
     // This will generate a seedphrase
@@ -370,63 +370,60 @@ useEffect(() => {
 
 Below that, we will add the second one which takes the `seedPhrase` as a dependency and therefore it will run every time a new seed phrase is introduced (eg. once when the page is loading and once every time a new seed phrase is manually added) and will update the addresses.
 
-````
-
+```
 useEffect(() => {
-EmurgoModule.CardanoWasm().then((cardano) => {
-if (seedPhrase.length) {
-// This will generate a private key
-const getPrivateKey = generatePrivateKey(seedPhrase).then((pkey) => {
-setPrivateKey(pkey);
-// This will generate a stake address based on the private key
-const getStakeAddress = generateStakeObject(
-derivePrivateKey(pkey)
-).then((sObj) => {
-setStakeAddress(sObj.stakeAddress);
-});
-// This will generate a set of payment addresses based on the private key, the network ID,
-// the chain (which can be external (0) or internal(1)) and the amount of addresses we want to generate.
-const totalAddresses = 30;
-// Generate external payment addresses
-generateMultipleAddresses(pkey, 0, 0, totalAddresses).then(
-(pAddresses) => {
-setExternalPaymentAddresses(pAddresses);
-}
-);
-// Generate internal payment addresses
-generateMultipleAddresses(pkey, 0, 1, totalAddresses).then(
-(pAddresses) => {
-setInternalPaymentAddresses(pAddresses);
-}
-);
-});
-}
-});
+  EmurgoModule.CardanoWasm().then((cardano) => {
+    if (seedPhrase.length) {
+      // This will generate a private key
+      const getPrivateKey = generatePrivateKey(seedPhrase).then((pkey) => {
+        setPrivateKey(pkey);
+        // This will generate a stake address based on the private key
+        const getStakeAddress = generateStakeObject(
+          derivePrivateKey(pkey)
+        ).then((sObj) => {
+          setStakeAddress(sObj.stakeAddress);
+        });
+        // This will generate a set of payment addresses based on the private key, the network ID,
+        // the chain (which can be external (0) or internal(1)) and the amount of addresses we want to generate.
+        const totalAddresses = 30;
+        // Generate external payment addresses
+        generateMultipleAddresses(pkey, 0, 0, totalAddresses).then(
+          (pAddresses) => {
+            setExternalPaymentAddresses(pAddresses);
+          }
+        );
+        // Generate internal payment addresses
+        generateMultipleAddresses(pkey, 0, 1, totalAddresses).then(
+          (pAddresses) => {
+            setInternalPaymentAddresses(pAddresses);
+          }
+        );
+      });
+    }
+  });
 }, [seedPhrase]);
-
 ```
 
 After that and right before the `return` we will add the following code which will take care of handling the click on our update button:
 
 ```
-
 const handleClick = () => {
-if (validateSeedPhrase(updatedSeedPhrase)) {
-setSeedPhrase(updatedSeedPhrase);
-} else {
-alert('invalid seed phrase');
-}
+  if (validateSeedPhrase(updatedSeedPhrase)) {
+    setSeedPhrase(updatedSeedPhrase);
+  } else {
+    alert('invalid seed phrase');
+  }
 };
-
 ```
 
 Ultimately, on a new line right after the title of our page, we will add the following code:
 
 ```
-
 <h3>Use custom seed phrase:</h3>
 <input onChange={(event) => setUpdatedSeedPhrase(event.target.value)} />
 <button onClick={handleClick}>Update</button>
 ```
 
 If you now look at your browser you should see what follows.
+
+![15122022165838](https://user-images.githubusercontent.com/119612231/207921773-bbd788fa-34ad-4b96-ac70-06e26c795e3a.jpg)
