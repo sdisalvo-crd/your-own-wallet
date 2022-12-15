@@ -7,7 +7,7 @@ import {
   generatePrivateKey,
   derivePrivateKey,
   generateStakeObject,
-  generatePaymentAddress,
+  generateMultipleAddresses,
 } from './lib/account';
 
 export const App = () => {
@@ -15,7 +15,12 @@ export const App = () => {
   const [isValid, setIsValid] = useState(false);
   const [privateKey, setPrivateKey] = useState<any>(undefined);
   const [stakeAddress, setStakeAddress] = useState<any>(undefined);
-  const [paymentAddresses, setPaymentAddresses] = useState<string[]>([]);
+  const [externalPaymentAddresses, setExternalPaymentAddresses] = useState<
+    string[]
+  >([]);
+  const [internalPaymentAddresses, setInternalPaymentAddresses] = useState<
+    string[]
+  >([]);
 
   useEffect(() => {
     EmurgoModule.CardanoWasm().then((cardano) => {
@@ -33,11 +38,19 @@ export const App = () => {
         ).then((sObj) => {
           setStakeAddress(sObj.stakeAddress);
         });
-        // This will generate a payment address based on the private key, the network ID,
-        // the chain (which can be internal or external) and the index.
-        const paymentAddress = generatePaymentAddress(pkey, 0, 0, 0).then(
-          (pAddress) => {
-            setPaymentAddresses([...paymentAddresses, pAddress]);
+        // This will generate a set of payment addresses based on the private key, the network ID,
+        // the chain (which can be external (0) or internal(1)) and the amount of addresses we want to generate.
+        const totalAddresses = 30;
+        // Generate external payment addresses
+        generateMultipleAddresses(pkey, 0, 0, totalAddresses).then(
+          (pAddresses) => {
+            setExternalPaymentAddresses(pAddresses);
+          }
+        );
+        // Generate internal payment addresses
+        generateMultipleAddresses(pkey, 0, 1, totalAddresses).then(
+          (pAddresses) => {
+            setInternalPaymentAddresses(pAddresses);
           }
         );
       });
@@ -47,16 +60,25 @@ export const App = () => {
   return (
     <>
       <h1>Your own wallet</h1>
+      <h3>Seed phrase:</h3>
       <p>
-        <strong>Seed phrase:</strong> {seedPhrase}
+        {seedPhrase}
         {isValid ? ' (valid)' : ' (invalid)'}
       </p>
-      <p>
-        <strong>Stake address:</strong> {stakeAddress}
-      </p>
-      <p>
-        <strong>Payment address:</strong> {paymentAddresses[0]}
-      </p>
+      <h3>Stake address:</h3>
+      <p>{stakeAddress}</p>
+      <h3>External payment addresses:</h3>
+      <ol start='0'>
+        {externalPaymentAddresses.map((address, index) => (
+          <li key={index}>{address}</li>
+        ))}
+      </ol>
+      <h3>Internal payment addresses:</h3>
+      <ol start='0'>
+        {internalPaymentAddresses.map((address, index) => (
+          <li key={index}>{address}</li>
+        ))}
+      </ol>
     </>
   );
 };

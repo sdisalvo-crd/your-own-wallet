@@ -268,7 +268,7 @@ If you now run `npm start` and take a look at your browser you should see the se
 
 ![13122022151446](https://user-images.githubusercontent.com/119612231/207372478-29a31a6b-0515-4a7d-8aa3-51fb9d441ec9.jpg)
 
-14. We will now generate a payment address in a similar way as we did for the stake address adding the following new method to the `account.ts` file:
+14. We will now generate some payment addresses in a similar way as we did for the stake address adding the following new methods to the `account.ts` file:
 
 ```
 export const generatePaymentAddress = async (derivePkey: Bip32PrivateKey, network: number, chain: number, index: number) => {
@@ -280,34 +280,68 @@ export const generatePaymentAddress = async (derivePkey: Bip32PrivateKey, networ
     Cardano.StakeCredential.from_keyhash(stakeObject.publicStakeKey.hash()));
   return paymentAddress.to_address().to_bech32();
 }
+
+export const generateMultipleAddresses = async (derivePkey: Bip32PrivateKey, network: number, chain: number, totalAddresses: number) => {
+  let addresses: string[] = [];
+  for(let i = 0; i < totalAddresses; i++) {
+    addresses = [...addresses, await generatePaymentAddress(derivePkey, network, chain, i)];
+  }
+  return addresses;
+}
 ```
 
-We will add the following new state on a new line at line 18 of the `App.tsx` file:
+Then, inside the `App.tsx` file, we will add `generatePaymentAddress` to the list of methods imported from `./lib/account` and the we will add the following new state variables on a new line at line 18:
 
 ```
-const [paymentAddresses, setPaymentAddresses] = useState<string[]>([]);
+  const [externalPaymentAddresses, setExternalPaymentAddresses] = useState<string[]>([]);
+  const [internalPaymentAddresses, setInternalPaymentAddresses] = useState<string[]>([]);
 ```
 
-And the following new variable below the `getStakeAddress` variable on a new line at line 36:
+And the following code on a new line below the `getStakeAddress` variable:
 
 ```
-// This will generate a payment address based on the private key, the network ID,
-// the chain (which can be internal or external) and the index.
-const paymentAddress = generatePaymentAddress(pkey, 0, 0, 0).then(
-  (pAddress) => {
-    setPaymentAddresses([...paymentAddresses, pAddress]);
+// This will generate a set of payment addresses based on the private key, the network ID,
+// the chain (which can be external (0) or internal(1)) and the amount of addresses we want to generate.
+const totalAddresses = 30;
+// Generate external payment addresses
+generateMultipleAddresses(pkey, 0, 0, totalAddresses).then(
+  (pAddresses) => {
+    setExternalPaymentAddresses(pAddresses);
+  }
+);
+// Generate internal payment addresses
+generateMultipleAddresses(pkey, 0, 1, totalAddresses).then(
+  (pAddresses) => {
+    setInternalPaymentAddresses(pAddresses);
   }
 );
 ```
 
-Then we will display our address in the browser adding the following code in a new line at line 57:
+Since we will now have a lot more info to display in the browser, we will reformat and replace the JSX code returned in our app with the following one:
 
 ```
-<p>
-  <strong>Payment address:</strong> {paymentAddresses[0]}
-</p>
+<>
+  <h1>Your own wallet</h1>
+  <h3>Seed phrase:</h3>
+  <p>
+    {seedPhrase}
+    {isValid ? ' (valid)' : ' (invalid)'}
+  </p>
+  <h3>Stake address:</h3>
+  <p>{stakeAddress}</p>
+  <h3>External payment addresses:</h3>
+  <ol start='0'>
+    {externalPaymentAddresses.map((address, index) => (
+      <li key={index}>{address}</li>
+    ))}
+  </ol>
+  <h3>Internal payment addresses:</h3>
+  <ol start='0'>
+    {internalPaymentAddresses.map((address, index) => (
+      <li key={index}>{address}</li>
+    ))}
+  </ol>
+</>
 ```
 
 The final result should look like this:
-
-![14122022135839](https://user-images.githubusercontent.com/119612231/207621244-b1af9eb9-07bc-45cf-8b45-902165ca0428.jpg)

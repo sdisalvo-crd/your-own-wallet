@@ -60,3 +60,11 @@ export const generatePaymentAddress = async (derivePkey: Bip32PrivateKey, networ
     Cardano.StakeCredential.from_keyhash(stakeObject.publicStakeKey.hash()));
   return paymentAddress.to_address().to_bech32();
 }
+
+export const generateMultipleAddresses = async (derivePkey: Bip32PrivateKey, network: number, chain: number, totalAddresses: number) => {
+  let addresses: string[] = [];
+  for(let i = 0; i < totalAddresses; i++) {
+    addresses = [...addresses, await generatePaymentAddress(derivePkey, network, chain, i)];
+  }
+  return addresses;
+}
