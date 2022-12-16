@@ -1,6 +1,7 @@
 import { Bip32PrivateKey } from '@emurgo/cardano-serialization-lib-browser';
 import { generateMnemonic, mnemonicToEntropy, validateMnemonic } from 'bip39';
 import { EmurgoModule } from './emurgo/loader';
+import { customAlphabet } from 'nanoid';
 
 // To generate a 15 word seedphrase use size 160.
 // To generate a 24 word seedphase use size 256.
@@ -67,4 +68,18 @@ export const generateMultipleAddresses = async (derivePkey: Bip32PrivateKey, net
     addresses = [...addresses, await generatePaymentAddress(derivePkey, network, chain, i)];
   }
   return addresses;
+}
+
+export const encryptWithPassword = async (privateKey: Bip32PrivateKey, spendingPassword: string) => {
+  const Cardano = await EmurgoModule.CardanoWasm();
+  const privateKeyHex = Buffer.from(privateKey.as_bytes()).toString('hex');
+  const generateRandomHex = customAlphabet('0123456789abcdef');
+  const salt = generateRandomHex(64);
+  const nonce = generateRandomHex(24);
+  return Cardano.encrypt_with_password(spendingPassword, salt, nonce, privateKeyHex);
+}
+
+export const decryptWithPassword = async (spendingPassword: string, data: string) => {
+  const Cardano = await EmurgoModule.CardanoWasm();
+  return Cardano.decrypt_with_password(spendingPassword, data);
 }

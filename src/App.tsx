@@ -1,5 +1,5 @@
 import './styles.css';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { EmurgoModule } from './lib/emurgo/loader';
 import {
   generateMnemonicSeed,
@@ -23,46 +23,63 @@ export const App = () => {
     string[]
   >([]);
 
-  useEffect(() => {
-    EmurgoModule.CardanoWasm().then((cardano) => {
-      // This will generate a seedphrase
-      const getSeedPhrase = generateMnemonicSeed(160);
-      setSeedPhrase(getSeedPhrase);
-      // This will verify that the seedphrase is valid
-      setIsValid(validateSeedPhrase(getSeedPhrase));
-    });
-  }, []);
+  const useIsMounted = () => {
+    const isMounted = useRef(false);
+    // @ts-ignore
+    useEffect(() => {
+      isMounted.current = true;
+      return () => (isMounted.current = false);
+    }, []);
+    return isMounted;
+  };
+
+  const isMounted = useIsMounted();
 
   useEffect(() => {
-    EmurgoModule.CardanoWasm().then((cardano) => {
-      if (seedPhrase.length) {
-        // This will generate a private key
-        const getPrivateKey = generatePrivateKey(seedPhrase).then((pkey) => {
-          setPrivateKey(pkey);
-          // This will generate a stake address based on the private key
-          const getStakeAddress = generateStakeObject(
-            derivePrivateKey(pkey)
-          ).then((sObj) => {
-            setStakeAddress(sObj.stakeAddress);
-          });
-          // This will generate a set of payment addresses based on the private key, the network ID,
-          // the chain (which can be external (0) or internal(1)) and the amount of addresses we want to generate.
-          const totalAddresses = 30;
-          // Generate external payment addresses
-          generateMultipleAddresses(pkey, 0, 0, totalAddresses).then(
-            (pAddresses) => {
-              setExternalPaymentAddresses(pAddresses);
-            }
-          );
-          // Generate internal payment addresses
-          generateMultipleAddresses(pkey, 0, 1, totalAddresses).then(
-            (pAddresses) => {
-              setInternalPaymentAddresses(pAddresses);
-            }
-          );
-        });
+    const initAccount = async () => {
+      const Cardano = await EmurgoModule.CardanoWasm();
+      let sPhrase = undefined;
+      if (!seedPhrase.length) {
+        // This will generate a new seedphrase
+        sPhrase = generateMnemonicSeed(160);
+        setSeedPhrase(sPhrase);
+      } else {
+        sPhrase = seedPhrase;
       }
-    });
+      // This will verify that the seedphrase is valid
+      setIsValid(validateSeedPhrase(sPhrase));
+      // This will generate a private key
+      const pKey = await generatePrivateKey(sPhrase);
+      setPrivateKey(pKey);
+      // This will generate a stake address based on the private key
+      const sObject = await generateStakeObject(derivePrivateKey(pKey));
+      setStakeAddress(sObject);
+      // This will generate a set of payment addresses based on the private key, the network ID,
+      // the chain (which can be external (0) or internal(1)) and the amount of addresses we want to generate.
+      const totalAddresses = 30;
+      // Generate external payment addresses
+      const extAddr = await generateMultipleAddresses(
+        derivePrivateKey(pKey),
+        0,
+        0,
+        totalAddresses
+      );
+      setExternalPaymentAddresses(extAddr);
+      // Generate internal payment addresses
+      const intAddr = await generateMultipleAddresses(
+        derivePrivateKey(pKey),
+        0,
+        1,
+        totalAddresses
+      );
+      setInternalPaymentAddresses(intAddr);
+    };
+    if (isMounted.current) {
+      // call the function
+      initAccount()
+        // make sure to catch any error
+        .catch(console.error);
+    }
   }, [seedPhrase]);
 
   const handleClick = () => {
@@ -85,7 +102,7 @@ export const App = () => {
         {isValid ? ' (valid)' : ' (invalid)'}
       </p>
       <h3>Stake address:</h3>
-      <p>{stakeAddress}</p>
+      <p>{stakeAddress && stakeAddress.stakeAddress}</p>
       <h3>External payment addresses:</h3>
       <ol start='0'>
         {externalPaymentAddresses.map((address, index) => (
