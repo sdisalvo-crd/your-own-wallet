@@ -76,10 +76,12 @@ export const encryptWithPassword = async (privateKey: Bip32PrivateKey, spendingP
   const generateRandomHex = customAlphabet('0123456789abcdef');
   const salt = generateRandomHex(64);
   const nonce = generateRandomHex(24);
-  return Cardano.encrypt_with_password(spendingPassword, salt, nonce, privateKeyHex);
+  const encryptedKey = Cardano.encrypt_with_password(spendingPassword, salt, nonce, privateKeyHex);
+  return encryptedKey;
 }
 
 export const decryptWithPassword = async (spendingPassword: string, data: string) => {
   const Cardano = await EmurgoModule.CardanoWasm();
-  return Cardano.decrypt_with_password(spendingPassword, data);
+  const decryptedKey = Cardano.decrypt_with_password(spendingPassword, data);
+  return decryptedKey;
 }

@@ -8,6 +8,8 @@ import {
   derivePrivateKey,
   generateStakeObject,
   generateMultipleAddresses,
+  encryptWithPassword,
+  decryptWithPassword,
 } from './lib/account';
 
 export const App = () => {
@@ -16,6 +18,11 @@ export const App = () => {
   const [isValid, setIsValid] = useState(false);
   const [privateKey, setPrivateKey] = useState<any>(undefined);
   const [stakeAddress, setStakeAddress] = useState<any>(undefined);
+  const [spendingPassword, setSpendingPassword] = useState('B1234567bcde');
+  const [encryptedPrivateKey, setEncryptedPrivateKey] =
+    useState<any>(undefined);
+  const [decryptedPrivateKey, setDecryptedPrivateKey] =
+    useState<any>(undefined);
   const [externalPaymentAddresses, setExternalPaymentAddresses] = useState<
     string[]
   >([]);
@@ -73,6 +80,13 @@ export const App = () => {
         totalAddresses
       );
       setInternalPaymentAddresses(intAddr);
+      const encryptedPKey = await encryptWithPassword(pKey, spendingPassword);
+      setEncryptedPrivateKey(encryptedPKey);
+      const decryptedKey = await decryptWithPassword(
+        spendingPassword,
+        encryptedPKey
+      );
+      setDecryptedPrivateKey(decryptedKey);
     };
     if (isMounted.current) {
       // call the function
@@ -101,6 +115,12 @@ export const App = () => {
         {seedPhrase}
         {isValid ? ' (valid)' : ' (invalid)'}
       </p>
+      <h3>Private Key:</h3>
+      <p>{privateKey?.to_hex()}</p>
+      <h3>Encrypted Private Key:</h3>
+      <p>{encryptedPrivateKey}</p>
+      <h3>Decrypted Private Key:</h3>
+      <p>{decryptedPrivateKey}</p>
       <h3>Stake address:</h3>
       <p>{stakeAddress && stakeAddress.stakeAddress}</p>
       <h3>External payment addresses:</h3>

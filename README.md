@@ -444,3 +444,85 @@ Ultimately, on a new line right after the title of our page, we will add the fol
 If you now look at your browser you should see what follows.
 
 ![15122022165838](https://user-images.githubusercontent.com/119612231/207921773-bbd788fa-34ad-4b96-ac70-06e26c795e3a.jpg)
+
+12. At this point, we are ready to introduce our spending password and an encryption method that we will use for our private key. We start by running `npm i nanoid` in the terminal and adding the following import at the top of the `account.ts` file:
+
+```
+import { customAlphabet } from 'nanoid';
+```
+
+Then, we will add the following methods at the bottom for encrypting and decrypting:
+
+```
+export const encryptWithPassword = async (privateKey: Bip32PrivateKey, spendingPassword: string) => {
+  const Cardano = await EmurgoModule.CardanoWasm();
+  const privateKeyHex = Buffer.from(privateKey.as_bytes()).toString('hex');
+  const generateRandomHex = customAlphabet('0123456789abcdef');
+  const salt = generateRandomHex(64);
+  const nonce = generateRandomHex(24);
+  const encryptedKey = Cardano.encrypt_with_password(spendingPassword, salt, nonce, privateKeyHex);
+  return encryptedKey;
+}
+
+export const decryptWithPassword = async (spendingPassword: string, data: string) => {
+  const Cardano = await EmurgoModule.CardanoWasm();
+  const decryptedKey = Cardano.decrypt_with_password(spendingPassword, data);
+  return decryptedKey;
+}
+```
+
+13. We move to the `App.tsx` file, where we will add a new import from React, in this case the `useRef` method, so the whole line will look like this:
+
+```
+import { useState, useEffect, useRef } from 'react';
+```
+
+We will then import the two newly created methods for encrypting and decrypting to the list of other methods we are importing from `./lib/account` so that will now look like this:
+
+``` 
+import {
+  generateMnemonicSeed,
+  validateSeedPhrase,
+  generatePrivateKey,
+  derivePrivateKey,
+  generateStakeObject,
+  generateMultipleAddresses,
+  encryptWithPassword,
+  decryptWithPassword,
+} from './lib/account';
+```
+
+We will now add the following variables to our list:
+
+```
+const [spendingPassword, setSpendingPassword] = useState('B1234567bcde');
+const [encryptedPrivateKey, setEncryptedPrivateKey] = useState<any>(undefined);
+const [decryptedPrivateKey, setDecryptedPrivateKey] = useState<any>(undefined);
+```
+
+On a new line below `setInternalPaymentAddresses(intAddr);` we add the following code:
+
+``` 
+const encryptedPKey = await encryptWithPassword(pKey, spendingPassword);
+setEncryptedPrivateKey(encryptedPKey);
+const decryptedKey = await decryptWithPassword(
+  spendingPassword,
+  encryptedPKey
+);
+setDecryptedPrivateKey(decryptedKey);
+```
+
+Then we add the following code to our JSX, between the seed phrase and the stake address:
+
+```
+<h3>Private Key:</h3>
+<p>{privateKey?.to_hex()}</p>
+<h3>Encrypted Private Key:</h3>
+<p>{encryptedPrivateKey}</p>
+<h3>Decrypted Private Key:</h3>
+<p>{decryptedPrivateKey}</p>
+```
+
+If we now take a look at the browser we should see what follows:
+
+Note that the fields `Private key` and `Decrypted private key` should return the same value.
