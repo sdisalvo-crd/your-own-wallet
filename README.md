@@ -525,4 +525,6 @@ Then we add the following code to our JSX, between the seed phrase and the stake
 
 If we now take a look at the browser we should see what follows:
 
+![19122022135544](https://user-images.githubusercontent.com/119612231/208452529-5fd05bb4-c851-454e-80a9-339ba62b03db.jpg)
+
 Note that the fields `Private key` and `Decrypted private key` should return the same value.
