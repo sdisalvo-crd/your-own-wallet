@@ -227,7 +227,7 @@ export const App = () => {
   const [seedPhrase, setSeedPhrase] = useState('');
   const [isValid, setIsValid] = useState(false);
   const [privateKey, setPrivateKey] = useState<any>(undefined);
-  const [stakeAddress, setStakeAddress] = useState<any>(undefined);
+  const [stakeAddress, setStakeAddress] = useState('');
 
   useEffect(() => {
     EmurgoModule.CardanoWasm().then((cardano) => {
@@ -391,7 +391,7 @@ useEffect(() => {
     setPrivateKey(pKey);
     // This will generate a stake address based on the private key
     const sObject = await generateStakeObject(derivePrivateKey(pKey));
-    setStakeAddress(sObject);
+    setStakeAddress(sObject.stakeAddress);
     // This will generate a set of payment addresses based on the private key, the network ID,
     // the chain (which can be external (0) or internal(1)) and the amount of addresses we want to generate.
     const totalAddresses = 30;
@@ -413,10 +413,7 @@ useEffect(() => {
     setInternalPaymentAddresses(intAddr);
   };
   if (isMounted.current) {
-    // call the function
-    initAccount()
-      // make sure to catch any error
-      .catch(console.error);
+    initAccount().catch(console.error);
   }
 }, [seedPhrase]);
 ```
@@ -528,3 +525,79 @@ If we now take a look at the browser we should see what follows:
 ![19122022135544](https://user-images.githubusercontent.com/119612231/208452529-5fd05bb4-c851-454e-80a9-339ba62b03db.jpg)
 
 Note that the fields `Private key` and `Decrypted private key` should return the same value.
+
+14. In the terminal, run `npm i axios`, then, inside the `scr` folder, create a new folder and name it `api`. Here, we will create a new file and call it `index.ts` and we will paste the following code inside:
+
+```
+import axios from "axios";
+export const fetchBlockfrost = async (endpoint: string) => {
+
+  const config = {
+    method: 'GET',
+    url: endpoint,
+    headers: {
+      "project_id": 'preprodxEh6wjDX97dUuMbn1KiHSXvq43X58HoD'
+    }
+  };
+
+  return axios(config)
+    // If all went well we should be able to fetch some useful info
+    .then(response => {
+      return response.data;
+    })
+    // Otherwise we will see an error. This may usually happen when a new
+    // wallet is created and funds were never transferred to it.
+    .catch((error) => {
+      if (error.response && error.response.status === 404){
+        console.log('New wallet detected.');
+      }
+    });
+}
+```
+
+This will send a query to Blockfrost and return all info available for the address we have inquired about. We will import this into our `App.tsx` by adding this at the top:
+
+```
+import { fetchBlockfrost } from './api';
+```
+
+Then we will declare the following state variable to store the account state information:
+
+```
+const [stakeAddress, setStakeAddress] = useState('');
+```
+
+Then add the following code on a new line below `setDecryptedPrivateKey(decryptedKey);`:
+
+``` 
+// Query Blockfrost to check the address
+const aState = await fetchBlockfrost(
+  'https://cardano-preprod.blockfrost.io/api/v0/accounts/' +
+    sObject.stakeAddress
+);
+
+// If the address has ever received assets, it will show the balance
+if (aState?.controlled_amount > 0) {
+  setAccountState(
+    'Balance: ₳ ' +
+      (aState.controlled_amount / 1000000).toLocaleString('en-US', {
+        minimumFractionDigits: 6,
+      })
+  );
+} else {
+  // Otherwise it will tell us it's a new address
+  setAccountState('This is wallet was never initiated');
+}
+```
+
+Ultimately, add the following code right below the closing `</>` of the tsx code towards the bottom of the file:
+
+```
+<hr />
+<h3>Account state</h3>
+<p>{accountState}</p>
+```
+
+If the account has funds, you will see this:
+
+Otherwise you will see this:

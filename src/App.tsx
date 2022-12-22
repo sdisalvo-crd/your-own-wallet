@@ -11,14 +11,16 @@ import {
   encryptWithPassword,
   decryptWithPassword,
 } from './lib/account';
+import { fetchBlockfrost } from './api';
 
 export const App = () => {
   const [seedPhrase, setSeedPhrase] = useState('');
   const [updatedSeedPhrase, setUpdatedSeedPhrase] = useState('');
   const [isValid, setIsValid] = useState(false);
   const [privateKey, setPrivateKey] = useState<any>(undefined);
-  const [stakeAddress, setStakeAddress] = useState<any>(undefined);
+  const [stakeAddress, setStakeAddress] = useState('');
   const [spendingPassword, setSpendingPassword] = useState('B1234567bcde');
+  const [accountState, setAccountState] = useState('');
   const [encryptedPrivateKey, setEncryptedPrivateKey] =
     useState<any>(undefined);
   const [decryptedPrivateKey, setDecryptedPrivateKey] =
@@ -60,7 +62,7 @@ export const App = () => {
       setPrivateKey(pKey);
       // This will generate a stake address based on the private key
       const sObject = await generateStakeObject(derivePrivateKey(pKey));
-      setStakeAddress(sObject);
+      setStakeAddress(sObject.stakeAddress);
       // This will generate a set of payment addresses based on the private key, the network ID,
       // the chain (which can be external (0) or internal(1)) and the amount of addresses we want to generate.
       const totalAddresses = 30;
@@ -87,12 +89,29 @@ export const App = () => {
         encryptedPKey
       );
       setDecryptedPrivateKey(decryptedKey);
+
+      // Query Blockfrost to check the address
+      const aState = await fetchBlockfrost(
+        'https://cardano-preprod.blockfrost.io/api/v0/accounts/' +
+          sObject.stakeAddress
+      );
+
+      // If the address has ever received assets, it will show the balance
+      if (aState?.controlled_amount > 0) {
+        setAccountState(
+          'Balance: ₳ ' +
+            (aState.controlled_amount / 1000000).toLocaleString('en-US', {
+              minimumFractionDigits: 6,
+            })
+        );
+      } else {
+        // Otherwise it will tell us it's a new address
+        setAccountState('This is wallet was never initiated');
+      }
     };
+
     if (isMounted.current) {
-      // call the function
-      initAccount()
-        // make sure to catch any error
-        .catch(console.error);
+      initAccount().catch(console.error);
     }
   }, [seedPhrase]);
 
@@ -122,7 +141,7 @@ export const App = () => {
       <h3>Decrypted Private Key:</h3>
       <p>{decryptedPrivateKey}</p>
       <h3>Stake address:</h3>
-      <p>{stakeAddress && stakeAddress.stakeAddress}</p>
+      <p>{stakeAddress}</p>
       <h3>External payment addresses:</h3>
       <ol start='0'>
         {externalPaymentAddresses.map((address, index) => (
@@ -135,6 +154,9 @@ export const App = () => {
           <li key={index}>{address}</li>
         ))}
       </ol>
+      <hr />
+      <h3>Account state</h3>
+      <p>{accountState}</p>
     </>
   );
 };

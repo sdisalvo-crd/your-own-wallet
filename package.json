@@ -13,6 +13,7 @@
   "dependencies": {
     "@babel/plugin-transform-runtime": "^7.19.6",
     "@emurgo/cardano-serialization-lib-browser": "11.1.0",
+    "axios": "^1.2.1",
     "bip39": "^3.0.4",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.0",
