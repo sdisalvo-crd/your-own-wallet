@@ -598,6 +598,10 @@ Ultimately, add the following code right below the closing `</>` of the tsx code
 <p>{accountState}</p>
 ```
 
-If the account has funds, you will see this:
+If the account has ever received funds, you will see something like this:
+
+![22122022144816](https://user-images.githubusercontent.com/119612231/209159800-84d2438a-8eda-42ee-baa1-207ca34caacc.jpg)
 
 Otherwise you will see this:
+
+![22122022144748](https://user-images.githubusercontent.com/119612231/209159876-57c8b6be-819f-47d4-ab30-f28b7e5183f9.jpg)
