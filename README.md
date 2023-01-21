@@ -605,3 +605,43 @@ If the account has ever received funds, you will see something like this:
 Otherwise you will see this:
 
 ![22122022144748](https://user-images.githubusercontent.com/119612231/209159876-57c8b6be-819f-47d4-ab30-f28b7e5183f9.jpg)
+
+15. With the help of something like `react-collapsible` we can reorganize our `App.tsx` content into something more user friendly. Run the following command:
+
+```
+npm i react-collapsible
+```
+
+Replace your Private Key, Encrypted Private Key, Decrypted Private Key, Stake address, External payment addresses, Internal payment addresses with this:
+
+```
+      <Collapsible trigger='Private Key'>{privateKey?.to_hex()}</Collapsible>
+      <br />
+      <Collapsible trigger='Encrypted Private Key'>
+        {encryptedPrivateKey}
+      </Collapsible>
+      <br />
+      <Collapsible trigger='Decrypted Private Key'>
+        {decryptedPrivateKey}
+      </Collapsible>
+      <br />
+      <Collapsible trigger='Stake address'>{stakeAddress}</Collapsible>
+      <br />
+      <Collapsible trigger='External payment addresses'>
+        <ol start='0'>
+          {externalPaymentAddresses.map((address, index) => (
+            <li key={index}>{address}</li>
+          ))}
+        </ol>
+      </Collapsible>
+      <br />
+      <Collapsible trigger='Internal payment addresses'>
+        <ol start='0'>
+          {internalPaymentAddresses.map((address, index) => (
+            <li key={index}>{address}</li>
+          ))}
+        </ol>
+      </Collapsible>
+```
+
+The result should look like this:
