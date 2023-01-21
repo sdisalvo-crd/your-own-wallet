@@ -645,3 +645,5 @@ Replace your Private Key, Encrypted Private Key, Decrypted Private Key, Stake ad
 ```
 
 The result should look like this:
+
+![21012023174803](https://user-images.githubusercontent.com/119612231/213880243-27b08e66-4c7f-4730-8dc8-139c9c0544f5.gif)
