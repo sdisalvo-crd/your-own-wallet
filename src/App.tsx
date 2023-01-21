@@ -1,6 +1,7 @@
 import './styles.css';
 import { useState, useEffect, useRef } from 'react';
 import { EmurgoModule } from './lib/emurgo/loader';
+import Collapsible from 'react-collapsible';
 import {
   generateMnemonicSeed,
   validateSeedPhrase,
@@ -134,26 +135,34 @@ export const App = () => {
         {seedPhrase}
         {isValid ? ' (valid)' : ' (invalid)'}
       </p>
-      <h3>Private Key:</h3>
-      <p>{privateKey?.to_hex()}</p>
-      <h3>Encrypted Private Key:</h3>
-      <p>{encryptedPrivateKey}</p>
-      <h3>Decrypted Private Key:</h3>
-      <p>{decryptedPrivateKey}</p>
-      <h3>Stake address:</h3>
-      <p>{stakeAddress}</p>
-      <h3>External payment addresses:</h3>
-      <ol start='0'>
-        {externalPaymentAddresses.map((address, index) => (
-          <li key={index}>{address}</li>
-        ))}
-      </ol>
-      <h3>Internal payment addresses:</h3>
-      <ol start='0'>
-        {internalPaymentAddresses.map((address, index) => (
-          <li key={index}>{address}</li>
-        ))}
-      </ol>
+      <br />
+      <Collapsible trigger='Private Key'>{privateKey?.to_hex()}</Collapsible>
+      <br />
+      <Collapsible trigger='Encrypted Private Key'>
+        {encryptedPrivateKey}
+      </Collapsible>
+      <br />
+      <Collapsible trigger='Decrypted Private Key'>
+        {decryptedPrivateKey}
+      </Collapsible>
+      <br />
+      <Collapsible trigger='Stake address'>{stakeAddress}</Collapsible>
+      <br />
+      <Collapsible trigger='External payment addresses'>
+        <ol start='0'>
+          {externalPaymentAddresses.map((address, index) => (
+            <li key={index}>{address}</li>
+          ))}
+        </ol>
+      </Collapsible>
+      <br />
+      <Collapsible trigger='Internal payment addresses'>
+        <ol start='0'>
+          {internalPaymentAddresses.map((address, index) => (
+            <li key={index}>{address}</li>
+          ))}
+        </ol>
+      </Collapsible>
       <hr />
       <h3>Account state</h3>
       <p>{accountState}</p>

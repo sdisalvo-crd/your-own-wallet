@@ -1,0 +1,6 @@
+.Collapsible {
+    font-weight: bold;
+}
+.Collapsible__contentInner {
+    font-weight: normal;
+}
